@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carnet de recos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Work+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDE4D0;
+    --paper-dark:#E3D8BE;
+    --card:#FBF6E9;
+    --ink:#2A2420;
+    --ink-soft:#5A4F42;
+    --line:#C9BA9C;
+    --teal:#1F5C56;
+    --teal-soft:#DCEAE6;
+    --mustard:#C98A1F;
+    --mustard-soft:#F3E2BD;
+    --rust:#B6431F;
+    --rust-soft:#F1DACE;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:
+      radial-gradient(var(--paper-dark) 1px, transparent 1px);
+    background-size:18px 18px;
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:32px 20px 80px;}
+  header{margin-bottom:28px;}
+  .eyebrow{
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 6px;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:38px;
+    margin:0 0 4px;
+    line-height:1.05;
+  }
+  .sub{color:var(--ink-soft);font-size:15px;margin:0;}
+
+  .tabs{
+    display:flex;
+    gap:6px;
+    margin:26px 0 18px;
+    border-bottom:2px solid var(--ink);
+    flex-wrap:wrap;
+  }
+  .tab{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:15px;
+    padding:10px 16px;
+    background:var(--paper-dark);
+    border:2px solid var(--ink);
+    border-bottom:none;
+    border-radius:8px 8px 0 0;
+    cursor:pointer;
+    color:var(--ink-soft);
+    position:relative;
+    top:2px;
+  }
+  .tab.active{
+    background:var(--card);
+    color:var(--ink);
+    top:0;
+  }
+  .tab .count{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    margin-left:6px;
+    opacity:.65;
+  }
+
+  .toolbar{
+    display:flex;
+    gap:10px;
+    margin-bottom:22px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  input[type=text], textarea, select{
+    font-family:'Work Sans', sans-serif;
+    font-size:14px;
+    padding:9px 12px;
+    border:1.5px solid var(--ink);
+    border-radius:6px;
+    background:var(--card);
+    color:var(--ink);
+  }
+  input[type=text]:focus, textarea:focus, select:focus{
+    outline:2px solid var(--teal);
+    outline-offset:1px;
+  }
+  #search{flex:1;min-width:160px;}
+  .btn{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:14px;
+    padding:9px 16px;
+    border:2px solid var(--ink);
+    border-radius:6px;
+    background:var(--mustard);
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .btn:hover{background:var(--rust);color:var(--card);}
+  .btn.ghost{background:transparent;}
+  .btn.ghost:hover{background:var(--paper-dark);color:var(--ink);}
+  .btn.small{font-size:12px;padding:5px 10px;border-width:1.5px;}
+
+  #form-panel{
+    display:none;
+    background:var(--card);
+    border:2px solid var(--ink);
+    border-radius:10px;
+    padding:18px;
+    margin-bottom:24px;
+  }
+  #form-panel.open{display:block;}
+  .form-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+  .form-row > *{flex:1;min-width:140px;}
+  .form-row textarea{width:100%;min-height:60px;resize:vertical;font-family:'Work Sans',sans-serif;}
+  .field-label{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--ink-soft);
+    display:block;
+    margin-bottom:4px;
+  }
+  .stars-input{display:flex;gap:4px;font-size:20px;}
+  .stars-input span{cursor:pointer;color:var(--line);}
+  .stars-input span.on{color:var(--mustard);}
+
+  #track-results{
+    position:absolute;
+    top:100%;left:0;right:0;
+    background:var(--card);
+    border:1.5px solid var(--ink);
+    border-radius:6px;
+    margin-top:4px;
+    z-index:5;
+    max-height:240px;
+    overflow-y:auto;
+    display:none;
+  }
+  #track-results.open{display:block;}
+  .track-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:7px 10px;
+    cursor:pointer;
+    border-bottom:1px solid var(--paper-dark);
+  }
+  .track-row:last-child{border-bottom:none;}
+  .track-row:hover{background:var(--paper-dark);}
+  .track-row img{width:32px;height:32px;border-radius:3px;flex-shrink:0;}
+  .track-row .tr-text{min-width:0;}
+  .track-row .tr-title{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .track-row .tr-artist{font-size:11px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .track-status{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    padding:7px 10px;
+  }
+  #track-selected{margin:-2px 0 10px;}
+  .track-chip{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--teal-soft);
+    border-radius:6px;
+    padding:6px 10px;
+    font-size:13px;
+  }
+  .track-chip img{width:28px;height:28px;border-radius:3px;}
+  .track-chip .tc-text{flex:1;color:var(--teal);}
+  .track-chip button{
+    background:none;border:none;cursor:pointer;
+    color:var(--teal);font-size:16px;line-height:1;
+  }
+
+  .platform-links{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+  .plink{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    text-decoration:none;
+    padding:4px 9px;
+    border-radius:20px;
+    border:1.5px solid var(--ink);
+    color:var(--ink);
+  }
+  .plink:hover{background:var(--ink);color:var(--card);}
+  .stub-art{width:40px;height:40px;border-radius:4px;flex-shrink:0;}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(250px, 1fr));
+    gap:18px;
+  }
+  .stub{
+    background:var(--card);
+    border:2px solid var(--ink);
+    border-radius:4px;
+    position:relative;
+    padding:16px 16px 14px 22px;
+  }
+  .stub::before{
+    content:"";
+    position:absolute;
+    left:-1px;top:0;bottom:0;
+    width:14px;
+    background-image:radial-gradient(circle, var(--paper) 4px, transparent 4.5px);
+    background-size:14px 16px;
+    background-repeat:repeat-y;
+    background-position:left center;
+  }
+  .stub-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;}
+  .stamp{
+    font-family:'Space Mono', monospace;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:.06em;
+    padding:3px 8px;
+    border-radius:20px;
+    transform:rotate(-3deg);
+    white-space:nowrap;
+  }
+  .stamp.musique{background:var(--teal-soft);color:var(--teal);}
+  .stamp.film{background:var(--rust-soft);color:var(--rust);}
+  .stamp.serie{background:var(--mustard-soft);color:var(--mustard);}
+  .stub-title{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:18px;
+    line-height:1.2;
+    margin:0 0 4px;
+  }
+  .stub-meta{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    margin:0 0 8px;
+  }
+  .stub-comment{
+    font-size:14px;
+    color:var(--ink-soft);
+    margin:0 0 10px;
+    line-height:1.45;
+  }
+  .stub-foot{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-top:1px dashed var(--line);
+    padding-top:8px;
+  }
+  .stars{color:var(--mustard);font-size:14px;letter-spacing:1px;}
+  .stars .off{color:var(--line);}
+
+  .empty{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--ink-soft);
+    font-family:'Fraunces', serif;
+    font-size:17px;
+  }
+  .name-row{
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .name-row input{
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    padding:5px 8px;
+  }
+  .notice{
+    font-size:12px;
+    color:var(--ink-soft);
+    background:var(--paper-dark);
+    border-radius:6px;
+    padding:8px 12px;
+    margin-bottom:18px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Entre nous</p>
+    <h1>Carnet de recos</h1>
+    <p class="sub">Musique, films, séries — tout ce qu'on se conseille, au même endroit.</p>
+  </header>
+
+  <p class="notice">Les recos ajoutées ici sont visibles par tout le monde qui ouvre ce carnet — comme une étagère commune.</p>
+
+  <div class="name-row">
+    <span>Tu signes comme :</span>
+    <input type="text" id="my-name" placeholder="ton prénom" maxlength="24">
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="Chercher un titre...">
+    <button class="btn" id="open-form-btn">+ Ajouter une reco</button>
+  </div>
+
+  <div id="form-panel">
+    <div class="form-row">
+      <div>
+        <label class="field-label">Catégorie</label>
+        <select id="f-type">
+          <option value="musique">Musique</option>
+          <option value="film">Film</option>
+          <option value="serie">Série</option>
+        </select>
+      </div>
+      <div style="position:relative;">
+        <label class="field-label">Titre</label>
+        <input type="text" id="f-title" placeholder="ex: Currents - Tame Impala" autocomplete="off">
+        <div id="track-results"></div>
+      </div>
+    </div>
+    <div class="form-row" id="tmdb-key-row" style="display:none;">
+      <div style="flex:1;">
+        <label class="field-label">Clé API TMDb (gratuite, une seule fois)</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="tmdb-key-input" placeholder="Colle ta clé ici">
+          <button class="btn small" id="save-tmdb-key" type="button" style="flex:none;">OK</button>
+        </div>
+        <p style="font-size:11px;color:var(--ink-soft);margin:4px 0 0;">Crée une clé gratuite sur <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener" style="color:var(--teal);">themoviedb.org/settings/api</a>, puis colle-la ici.</p>
+      </div>
+    </div>
+    <div id="track-selected"></div>
+    <div class="form-row">
+      <div>
+        <label class="field-label">Note</label>
+        <div class="stars-input" id="f-stars">
+          <span data-v="1">&#9733;</span><span data-v="2">&#9733;</span><span data-v="3">&#9733;</span><span data-v="4">&#9733;</span><span data-v="5">&#9733;</span>
+        </div>
+      </div>
+    </div>
+    <div class="form-row">
+      <textarea id="f-comment" placeholder="Pourquoi tu recommandes ça (optionnel)"></textarea>
+    </div>
+    <div class="form-row" style="justify-content:flex-end;">
+      <button class="btn ghost small" id="cancel-form-btn" style="flex:none;">Annuler</button>
+      <button class="btn small" id="save-form-btn" style="flex:none;">Enregistrer</button>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty-state" style="display:none;">Rien ici pour l'instant. La première reco vous tend les bras.</div>
+
+</div>
+
+<script>
+const TYPES = {
+  musique:{label:'Musique', cls:'musique'},
+  film:{label:'Film', cls:'film'},
+  serie:{label:'Série', cls:'serie'}
+};
+
+let allRecos = [];
+let activeTab = 'tous';
+let formRating = 0;
+
+const grid = document.getElementById('grid');
+const tabsEl = document.getElementById('tabs');
+const emptyState = document.getElementById('empty-state');
+const searchInput = document.getElementById('search');
+const nameInput = document.getElementById('my-name');
+
+async function loadName(){
+  try{
+    const r = await window.storage.get('my-name', false);
+    if(r && r.value) nameInput.value = r.value;
+  }catch(e){}
+}
+nameInput.addEventListener('change', async ()=>{
+  try{ await window.storage.set('my-name', nameInput.value.trim(), false); }catch(e){}
+});
+
+async function loadRecos(){
+  try{
+    const r = await window.storage.get('recos-list', true);
+    allRecos = r && r.value ? JSON.parse(r.value) : [];
+  }catch(e){
+    allRecos = [];
+  }
+  render();
+}
+
+async function saveRecos(){
+  try{
+    await window.storage.set('recos-list', JSON.stringify(allRecos), true);
+  }catch(e){
+    console.error('storage error', e);
+  }
+}
+
+function renderTabs(){
+  const counts = {tous:allRecos.length, musique:0, film:0, serie:0};
+  allRecos.forEach(r=>{ if(counts[r.type]!==undefined) counts[r.type]++; });
+  const defs = [['tous','Tous'], ['musique','Musique'], ['film','Films'], ['serie','Séries']];
+  tabsEl.innerHTML = defs.map(([key,label])=>
+    `<div class="tab ${activeTab===key?'active':''}" data-tab="${key}">${label}<span class="count">${counts[key]}</span></div>`
+  ).join('');
+  tabsEl.querySelectorAll('.tab').forEach(t=>{
+    t.addEventListener('click', ()=>{ activeTab = t.dataset.tab; render(); });
+  });
+}
+
+function starsHtml(rating){
+  let out = '';
+  for(let i=1;i<=5;i++){
+    out += i<=rating ? '&#9733;' : '<span class="off">&#9733;</span>';
+  }
+  return out;
+}
+
+function render(){
+  renderTabs();
+  const q = searchInput.value.trim().toLowerCase();
+  let list = allRecos.slice().sort((a,b)=> b.addedAt - a.addedAt);
+  if(activeTab !== 'tous') list = list.filter(r=>r.type===activeTab);
+  if(q) list = list.filter(r=> r.title.toLowerCase().includes(q));
+
+  if(list.length===0){
+    grid.innerHTML='';
+    emptyState.style.display='block';
+    return;
+  }
+  emptyState.style.display='none';
+
+  grid.innerHTML = list.map(r=>{
+    const t = TYPES[r.type] || TYPES.musique;
+    const date = new Date(r.addedAt).toLocaleDateString('fr-FR', {day:'numeric', month:'short'});
+    const meta = r.artist ? `${escapeHtml(r.recommender || 'anonyme')} · ${date}` : `ajouté par ${escapeHtml(r.recommender || 'anonyme')} · ${date}`;
+    let links = '';
+    if(r.type === 'musique' && (r.spotifyUrl || r.deezerUrl || r.appleMusicUrl)){
+      links = '<div class="platform-links">';
+      if(r.spotifyUrl) links += `<a class="plink" href="${r.spotifyUrl}" target="_blank" rel="noopener">Spotify</a>`;
+      if(r.deezerUrl) links += `<a class="plink" href="${r.deezerUrl}" target="_blank" rel="noopener">Deezer</a>`;
+      if(r.appleMusicUrl) links += `<a class="plink" href="${r.appleMusicUrl}" target="_blank" rel="noopener">Apple Music</a>`;
+      links += '</div>';
+    }
+    return `
+      <div class="stub">
+        <div class="stub-top">
+          <span class="stamp ${t.cls}">${t.label}</span>
+          <button class="btn ghost small" data-del="${r.id}" aria-label="Supprimer">&times;</button>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          ${r.artwork ? `<img class="stub-art" src="${r.artwork}" alt="">` : ''}
+          <div style="flex:1;min-width:0;">
+            <p class="stub-title">${escapeHtml(r.title)}</p>
+            ${r.artist ? `<p class="stub-meta" style="margin-top:-2px;">${escapeHtml(r.artist)}</p>` : ''}
+          </div>
+        </div>
+        <p class="stub-meta">${meta}</p>
+        ${r.comment ? `<p class="stub-comment">${escapeHtml(r.comment)}</p>` : ''}
+        ${links}
+        <div class="stub-foot">
+          <span class="stars">${starsHtml(r.rating)}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  grid.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      allRecos = allRecos.filter(r=> r.id !== btn.dataset.del);
+      await saveRecos();
+      render();
+    });
+  });
+}
+
+function escapeHtml(s){
+  return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+searchInput.addEventListener('input', render);
+
+const titleInput = document.getElementById('f-title');
+const trackResults = document.getElementById('track-results');
+const trackSelected = document.getElementById('track-selected');
+const typeSelect = document.getElementById('f-type');
+let pendingTrack = null;
+let searchTimer = null;
+
+function buildSearchLinks(title, artist){
+  const q = encodeURIComponent(artist ? `${title} ${artist}` : title);
+  return {
+    spotify: `https://open.spotify.com/search/${q}`,
+    deezer: `https://www.deezer.com/search/${q}`
+  };
+}
+
+function clearTrackUI(){
+  trackResults.classList.remove('open');
+  trackResults.innerHTML = '';
+  trackSelected.innerHTML = '';
+  pendingTrack = null;
+}
+
+let tmdbKey = null;
+
+async function loadTmdbKey(){
+  try{
+    const r = await window.storage.get('tmdb-key', false);
+    if(r && r.value) tmdbKey = r.value;
+  }catch(e){}
+  updateTmdbKeyUI();
+}
+
+function updateTmdbKeyUI(){
+  document.getElementById('tmdb-key-row').style.display = (typeSelect.value === 'film' && !tmdbKey) ? 'flex' : 'none';
+}
+
+document.getElementById('save-tmdb-key').addEventListener('click', async ()=>{
+  const v = document.getElementById('tmdb-key-input').value.trim();
+  if(!v) return;
+  tmdbKey = v;
+  try{ await window.storage.set('tmdb-key', v, false); }catch(e){}
+  updateTmdbKeyUI();
+  const term = titleInput.value.trim();
+  if(term.length >= 2) searchFilm(term);
+});
+
+typeSelect.addEventListener('change', ()=>{
+  clearTrackUI();
+  updateTmdbKeyUI();
+  titleInput.placeholder = typeSelect.value === 'musique'
+    ? 'ex: Currents - Tame Impala'
+    : (typeSelect.value === 'film' ? 'Tape le nom du film...' : 'ex: Severance');
+});
+
+titleInput.addEventListener('input', ()=>{
+  pendingTrack = null;
+  trackSelected.innerHTML = '';
+  if(typeSelect.value === 'serie'){
+    trackResults.classList.remove('open');
+    return;
+  }
+  clearTimeout(searchTimer);
+  const term = titleInput.value.trim();
+  if(term.length < 2){
+    trackResults.classList.remove('open');
+    trackResults.innerHTML = '';
+    return;
+  }
+  trackResults.classList.add('open');
+  trackResults.innerHTML = '<div class="track-status">Recherche...</div>';
+  searchTimer = setTimeout(()=>{
+    if(typeSelect.value === 'musique') searchMusic(term);
+    else searchFilm(term);
+  }, 350);
+});
+
+async function searchMusic(term){
+  try{
+    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&entity=song&limit=6`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('bad response');
+    const data = await res.json();
+    if(!data.results || data.results.length === 0){
+      trackResults.innerHTML = '<div class="track-status">Aucun résultat — tu peux quand même enregistrer le titre tapé.</div>';
+      return;
+    }
+    trackResults.innerHTML = data.results.map((tr, i)=> `
+      <div class="track-row" data-i="${i}">
+        <img src="${tr.artworkUrl100}" alt="">
+        <div class="tr-text">
+          <div class="tr-title">${escapeHtml(tr.trackName)}</div>
+          <div class="tr-artist">${escapeHtml(tr.artistName)}</div>
+        </div>
+      </div>
+    `).join('');
+    trackResults.querySelectorAll('.track-row').forEach(row=>{
+      row.addEventListener('click', ()=>{
+        const tr = data.results[parseInt(row.dataset.i,10)];
+        selectGeneric(tr.trackName, tr.artistName, tr.artworkUrl100, tr.trackViewUrl);
+      });
+    });
+  }catch(e){
+    trackResults.innerHTML = '<div class="track-status">Recherche indisponible (réseau bloqué) — tu peux quand même enregistrer le titre tapé.</div>';
+  }
+}
+
+async function searchFilm(term){
+  if(!tmdbKey){
+    trackResults.innerHTML = '<div class="track-status">Ajoute ta clé API TMDb ci-dessus pour activer la recherche.</div>';
+    return;
+  }
+  try{
+    const url = `https://api.themoviedb.org/3/search/movie?api_key=${encodeURIComponent(tmdbKey)}&query=${encodeURIComponent(term)}&language=fr-FR`;
+    const res = await fetch(url);
+    if(res.status === 401){
+      trackResults.innerHTML = '<div class="track-status">Clé API invalide — vérifie que tu l\'as bien copiée depuis TMDb.</div>';
+      return;
+    }
+    if(!res.ok) throw new Error('bad response');
+    const data = await res.json();
+    const results = (data.results || []).filter(m=>m.title).slice(0,6);
+    if(results.length === 0){
+      trackResults.innerHTML = '<div class="track-status">Aucun résultat — tu peux quand même enregistrer le titre tapé.</div>';
+      return;
+    }
+    trackResults.innerHTML = results.map((m,i)=>{
+      const year = m.release_date ? m.release_date.slice(0,4) : '';
+      const poster = m.poster_path ? `https://image.tmdb.org/t/p/w92${m.poster_path}` : '';
+      return `
+        <div class="track-row" data-i="${i}">
+          ${poster ? `<img src="${poster}" alt="">` : '<div style="width:32px;height:32px;border-radius:3px;background:var(--paper-dark);flex-shrink:0;"></div>'}
+          <div class="tr-text">
+            <div class="tr-title">${escapeHtml(m.title)}</div>
+            <div class="tr-artist">${escapeHtml(year)}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    trackResults.querySelectorAll('.track-row').forEach(row=>{
+      row.addEventListener('click', ()=>{
+        const m = results[parseInt(row.dataset.i,10)];
+        const year = m.release_date ? m.release_date.slice(0,4) : '';
+        const poster = m.poster_path ? `https://image.tmdb.org/t/p/w154${m.poster_path}` : '';
+        selectGeneric(m.title, year, poster, null);
+      });
+    });
+  }catch(e){
+    trackResults.innerHTML = '<div class="track-status">Recherche indisponible (réseau bloqué) — tu peux quand même enregistrer le titre tapé.</div>';
+  }
+}
+
+function selectGeneric(title, subtitle, artwork, appleUrl){
+  pendingTrack = { title, subtitle, artwork, appleMusicUrl: appleUrl || null };
+  titleInput.value = `${title}${subtitle ? ' — ' + subtitle : ''}`;
+  trackResults.classList.remove('open');
+  trackResults.innerHTML = '';
+  trackSelected.innerHTML = `
+    <div class="track-chip">
+      ${artwork ? `<img src="${artwork}" alt="">` : ''}
+      <span class="tc-text">${escapeHtml(title)}${subtitle ? ' · ' + escapeHtml(subtitle) : ''}</span>
+      <button type="button" id="clear-track" aria-label="Retirer la sélection">&times;</button>
+    </div>
+  `;
+  document.getElementById('clear-track').addEventListener('click', clearTrackUI);
+}
+
+loadTmdbKey();
+
+const formPanel = document.getElementById('form-panel');
+document.getElementById('open-form-btn').addEventListener('click', ()=>{
+  formPanel.classList.add('open');
+  document.getElementById('f-title').focus();
+});
+document.getElementById('cancel-form-btn').addEventListener('click', resetForm);
+
+const starsInput = document.getElementById('f-stars');
+starsInput.querySelectorAll('span').forEach(s=>{
+  s.addEventListener('click', ()=>{
+    formRating = parseInt(s.dataset.v, 10);
+    updateStarsInput();
+  });
+});
+function updateStarsInput(){
+  starsInput.querySelectorAll('span').forEach(s=>{
+    s.classList.toggle('on', parseInt(s.dataset.v,10) <= formRating);
+  });
+}
+
+function resetForm(){
+  formPanel.classList.remove('open');
+  document.getElementById('f-title').value='';
+  document.getElementById('f-comment').value='';
+  formRating = 0;
+  updateStarsInput();
+  clearTrackUI();
+}
+
+document.getElementById('save-form-btn').addEventListener('click', async ()=>{
+  const title = document.getElementById('f-title').value.trim();
+  if(!title){ document.getElementById('f-title').focus(); return; }
+  const type = document.getElementById('f-type').value;
+  const comment = document.getElementById('f-comment').value.trim();
+  const recommender = nameInput.value.trim();
+
+  const cleanTitle = pendingTrack ? pendingTrack.title : title;
+  const entry = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
+    type, title: cleanTitle, comment, recommender,
+    rating: formRating,
+    addedAt: Date.now()
+  };
+  if(type === 'musique'){
+    if(pendingTrack){
+      entry.artist = pendingTrack.subtitle;
+      entry.artwork = pendingTrack.artwork;
+      entry.appleMusicUrl = pendingTrack.appleMusicUrl;
+    }
+    const links = buildSearchLinks(pendingTrack ? pendingTrack.title : title, pendingTrack ? pendingTrack.subtitle : '');
+    entry.spotifyUrl = links.spotify;
+    entry.deezerUrl = links.deezer;
+  } else if(type === 'film' && pendingTrack){
+    entry.artist = pendingTrack.subtitle;
+    entry.artwork = pendingTrack.artwork;
+  }
+  allRecos.push(entry);
+  await saveRecos();
+  resetForm();
+  activeTab = 'tous';
+  render();
+});
+
+loadName();
+loadRecos();
+</script>
+</body>
+</html>
