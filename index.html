@@ -618,8 +618,12 @@ async function searchFilm(term){
     return;
   }
   try{
-    const url = `https://api.themoviedb.org/3/search/movie?api_key=${encodeURIComponent(tmdbKey)}&query=${encodeURIComponent(term)}&language=fr-FR`;
-    const res = await fetch(url);
+    const isV4 = tmdbKey.split('.').length === 3;
+    const url = isV4
+      ? `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(term)}&language=fr-FR`
+      : `https://api.themoviedb.org/3/search/movie?api_key=${encodeURIComponent(tmdbKey)}&query=${encodeURIComponent(term)}&language=fr-FR`;
+    const opts = isV4 ? { headers: { 'Authorization': `Bearer ${tmdbKey}`, 'accept': 'application/json' } } : {};
+    const res = await fetch(url, opts);
     if(res.status === 401){
       trackResults.innerHTML = '<div class="track-status">Clé API invalide — vérifie que tu l\'as bien copiée depuis TMDb.</div>';
       return;
